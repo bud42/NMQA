@@ -1,2 +1,2 @@
-docker build -t bud42/nmqa:v1 .
+docker build -t bud42/nmqa:v1 ..
 
