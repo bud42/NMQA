@@ -27,6 +27,7 @@ RUN wget -P /opt https://www.fil.ion.ucl.ac.uk/spm/download/restricted/utopia/sp
     && /opt/spm12/spm12 function exit \
     && chmod +x /opt/spm12/spm12
 
+ENV ANTSPATH=/opt/ants/bin
 COPY src /opt/src
 COPY ext /opt/ext
 

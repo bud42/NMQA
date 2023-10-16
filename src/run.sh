@@ -29,7 +29,6 @@ antsBrainExtraction.sh \
 
 echo "3. Registering T1 to template"
 LD_LIBRARY_PATH=/opt/ants/lib && \
-ANTSPATH=/opt/ants/bin && \
 antsRegistrationSyNQuick.sh \
 -d 3 \
 -f /opt/ext/tpl-MNI152NLin2009cAsym_res-01_desc-brain_T1w.nii.gz \
@@ -38,7 +37,6 @@ antsRegistrationSyNQuick.sh \
 
 echo "4. Registering NM to T1"
 LD_LIBRARY_PATH=/opt/ants/lib && \
-ANTSPATH=/opt/ants/bin && \
 antsRegistrationSyNQuick.sh \
 -d 3 \
 -f T1.nii.gz \
@@ -48,7 +46,6 @@ antsRegistrationSyNQuick.sh \
 
 echo "5. Apply transforms to NM"
 LD_LIBRARY_PATH=/opt/ants/lib && \
-ANTSPATH=/opt/ants/bin && \
 antsApplyTransforms \
 -d 3 \
 -i meanNM.nii.gz \
