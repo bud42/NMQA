@@ -20,5 +20,4 @@ TODO: add masks of crus cerebri and substantia nigra
 TODO: CNR at each voxel in the NM-MRI image was calculated as the percent signal difference in NM-MRI signal intensity at a given voxel (IV) from the signal intensity in 
 
 
-icc_mode = mode calculated for each participant from a kernel-smoothing-function fit of a histogram of all voxels in the crus cerebri
-
+CNRV = {[IV - mode(ICC)] / mode(ICC)}*100
