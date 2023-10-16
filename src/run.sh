@@ -1,30 +1,9 @@
-
-# 1. 
-# spm realign spm imcalc SPM-ImCalc
-# NM
-# avgNM
-
-# 2.
-# antsBrainExtraction.sh 
-# T1
-# bT1
-
-# 3.
-# antsRegistrationSyN.sh (rigid + affine + deformable syn)
-# bT1 
-# MNI152NLin2009cAsym
-# wbT1
-
-# 4.
-# antsRegistrationSyN.sh (rigid)
-# avgNM 
-# T1
-
-# 5. antsApplyTransforms 
-# wavgNM
-
-# 6. spm smooth 1mm
-# swavgNM
+# 1. spm realign NM
+# 2. antsBrainExtraction.sh T1
+# 3. antsRegistrationSyN.sh (rigid + affine + deformable syn) bT1 to MNI
+# 4. antsRegistrationSyN.sh (rigid) NM to T1
+# 5. antsApplyTransforms NM
+# 6. spm smooth 1mm NM
 
 echo "Prepping inputs"
 mkdir /OUTPUTS/DATA
@@ -43,6 +22,7 @@ antsBrainExtraction.sh \
 -a T1 \
 -e /opt/ext/OASIS/T_template0.nii.gz \
 -m /opt/ext/OASIS/T_template0_BrainCerebellumProbabilityMask.nii.gz \
+-f /opt/ext/OASIS/T_template0_BrainCerebellumRegistrationMask.nii.gz \
 -o T1
 
 echo "3. Registering T1 to template"
