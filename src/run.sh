@@ -29,54 +29,56 @@
 echo "Prepping inputs"
 mkdir /OUTPUTS/DATA
 cp -r /INPUTS/* /OUTPUTS/DATA/
-gunzip /OUTPUTS/DATA/*.nii.gz
 
 echo "1. Running realign"
-xvfb-run \
--e /OUTPUTS/xvfb.err -f /OUTPUTS/xvfb.auth \
--a --server-args "-screen 0 1600x1200x24" \
-/opt/spm12/run_spm.sh /opt/mcr/R2019b /opt/src/realign.m
-rm /OUTPUTS/xvfb.auth /OUTPUTS/xvfb.err
+gunzip /OUTPUTS/DATA/NM.nii.gz
+/opt/spm12/run_spm12.sh /opt/mcr/v92 script /opt/src/realign.m
+gzip /OUTPUTS/DATA/meanMN.nii
 
 echo "2. Extracting brain"
+ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS=1 && \
+LD_LIBRARY_PATH=/opt/ants/lib && \
 antsBrainExtraction.sh \
 -d 3 \
 -a T1 \
 -e /opt/ext/OASIS/T_template0.nii.gz \
 -m /opt/ext/OASIS/T_template0_BrainCerebellumProbabilityMask.nii.gz \
--o b
+-o T1
 
 echo "3. Registering T1 to template"
+LD_LIBRARY_PATH=/opt/ants/lib && \
+ANTSPATH=/opt/ants/bin &&
 antsRegistrationSyNQuick.sh \
 -d 3 \
 -f /opt/ext/tpl-MNI152NLin2009cAsym_res-01_desc-brain_T1w.nii.gz \
--m bT1.nii \
+-m T1BrainExtractionBrain.nii.gz \
 -o T1toTEMPLATE
 
 echo "4. Registering NM to T1"
+LD_LIBRARY_PATH=/opt/ants/lib && \
+ANTSPATH=/opt/ants/bin &&
 antsRegistrationSyNQuick.sh \
 -d 3 \
 -f T1.nii.gz \
 -t r \
--m mean_NM.nii.gz \
+-m meanNM.nii.gz \
 -o NMtoT1
 
 echo "5. Apply transforms to NM"
+LD_LIBRARY_PATH=/opt/ants/lib && \
+ANTSPATH=/opt/ants/bin &&
 antsApplyTransforms \
 -d 3 \
--i mean_NM.nii.gz \
+-i meanNM.nii.gz \
 -r /opt/ext/tpl-MNI152NLin2009cAsym_res-01_desc-brain_T1w.nii.gz \
--o wNM.nii.gz \
+-o wmeanNM.nii.gz \
 -t T1toTEMPLATE1Warp.nii.gz \
 -t T1toTEMPLATE0GenericAffine.mat \
 -t NMtoT10GenericAffine.mat
 
 echo "6. Smoothing NM"
-xvfb-run \
--e /OUTPUTS/xvfb.err \
--f /OUTPUTS/xvfb.auth \
--a --server-args "-screen 0 1600x1200x24" \
-/opt/spm12/run_spm.sh /opt/mcr/R2019b /opt/src/smooth.m
-rm /OUTPUTS/xvfb.auth /OUTPUTS/xvfb.err
+gunzip wmeanNM.nii.gz
+/opt/spm12/run_spm12.sh /opt/mcr/v92 script /opt/src/smooth.m
+gzip *.nii
 
 echo "ALL DONE!"

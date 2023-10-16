@@ -1,5 +1,6 @@
 FROM antsx/ants:latest
 
+# Install packages needed to get matlab and spm installers
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install \
      unzip xorg wget \
      && apt-get clean \
@@ -19,15 +20,14 @@ RUN mkdir /opt/mcr_install && \
     rm -rf /opt/mcr_install /tmp/*
 
 # Install SPM Standalone in /opt/spm12/
-ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:/opt/ants/lib:/opt/mcr/v92/runtime/glnxa64:/opt/mcr/v92/bin/glnxa64:/opt/mcr/v92/sys/os/glnxa64:/opt/mcr/v92/sys/opengl/lib/glnxa64:/opt/mcr/v92/extern/bin/glnxa64
 RUN wget -P /opt https://www.fil.ion.ucl.ac.uk/spm/download/restricted/utopia/spm12/spm12_r7771_Linux_R2017a.zip \
     && unzip -q /opt/spm12_r7771_Linux_R2017a.zip -d /opt \
-    && rm -f spm12_r7771_Linux_R2017a.zip \
+    && rm -f /opt/spm12_r7771_Linux_R2017a.zip \
     && /opt/spm12/spm12 function exit \
     && chmod +x /opt/spm12/spm12
 
-ADD src /opt
-ADD ext /opt
+COPY src /opt/src
+COPY ext /opt/ext
 
 # Configure entry point
 #ENTRYPOINT ["/opt/spm12/spm12"]
