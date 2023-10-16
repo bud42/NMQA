@@ -9,17 +9,19 @@ echo "Prepping inputs"
 mkdir /OUTPUTS/DATA
 cp -r /INPUTS/* /OUTPUTS/DATA/
 
+cd /OUTPUTS/DATA
+
 echo "1. Running realign"
-gunzip /OUTPUTS/DATA/NM.nii.gz
+gunzip NM.nii.gz
 /opt/spm12/run_spm12.sh /opt/mcr/v92 script /opt/src/realign.m
-gzip /OUTPUTS/DATA/meanMN.nii
+gzip meanNM.nii
 
 echo "2. Extracting brain"
 ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS=1 && \
 LD_LIBRARY_PATH=/opt/ants/lib && \
 antsBrainExtraction.sh \
 -d 3 \
--a T1 \
+-a T1.nii.gz \
 -e /opt/ext/OASIS/T_template0.nii.gz \
 -m /opt/ext/OASIS/T_template0_BrainCerebellumProbabilityMask.nii.gz \
 -f /opt/ext/OASIS/T_template0_BrainCerebellumRegistrationMask.nii.gz \
