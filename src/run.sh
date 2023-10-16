@@ -1,6 +1,6 @@
 # 1. spm realign NM
 # 2. antsBrainExtraction.sh T1
-# 3. antsRegistrationSyN.sh (rigid + affine + deformable syn) bT1 to MNI
+# 3. antsRegistrationSyN.sh (rigid + affine + deformable syn) Brain to MNI
 # 4. antsRegistrationSyN.sh (rigid) NM to T1
 # 5. antsApplyTransforms NM
 # 6. spm smooth 1mm NM
@@ -29,7 +29,7 @@ antsBrainExtraction.sh \
 
 echo "3. Registering T1 to template"
 LD_LIBRARY_PATH=/opt/ants/lib && \
-antsRegistrationSyNQuick.sh \
+antsRegistrationSyN.sh \
 -d 3 \
 -f /opt/ext/tpl-MNI152NLin2009cAsym_res-01_desc-brain_T1w.nii.gz \
 -m T1BrainExtractionBrain.nii.gz \
@@ -37,7 +37,7 @@ antsRegistrationSyNQuick.sh \
 
 echo "4. Registering NM to T1"
 LD_LIBRARY_PATH=/opt/ants/lib && \
-antsRegistrationSyNQuick.sh \
+antsRegistrationSyN.sh \
 -d 3 \
 -f T1.nii.gz \
 -t r \
