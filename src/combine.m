@@ -3,9 +3,9 @@ fig = spm_figure('CreateWin','Graphics');
 spm('defaults', 'fmri');
 spm_jobman('initcfg');
 
-merged_filename = '/OUTPUTS/merged_swmeanNM.nii';
+merged_filename = '/OUTPUTS/DATA/merged_swmeanNM.nii';
 
-files = spm_select('ExtFPListRec', '/OUTPUTS/SUBJECTS', '.*');
+files = spm_select('ExtFPListRec', '/OUTPUTS/DATA/SUBJECTS', '.*');
 input_filenames = cellstr(files);
 
 disp(input_filenames);
