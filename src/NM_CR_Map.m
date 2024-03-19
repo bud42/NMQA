@@ -1,15 +1,19 @@
 clc; clear all;
 
 %% Load Data
-NM_mask_s = load_nii('/opt/src/Segmentation.nii');
-NM_mask = NM_mask_s.img;
+%NM_mask_s = load_nii('/opt/src/Segmentation.nii');
+%NM_mask = NM_mask_s.img;
+NM_mask_s = spm_vol('/opt/src/Segmentation.nii');
+NM_mask = spm_read_vols(N_mask_s);
 mask_SN_R = ismember(NM_mask,1);
 mask_SN_L = ismember(NM_mask,2);
 mask_CC_R = ismember(NM_mask,3);
 mask_CC_L = ismember(NM_mask,4);
 
-NM_all_s = load_nii('/OUTPUTS/DATA/merged_swmeanNM.nii');
-NM_all = NM_all_s.img;
+%NM_all_s = load_nii('/OUTPUTS/DATA/merged_swmeanNM.nii');
+%NM_all = NM_all_s.img;
+NM_all_s = spm_vol('/OUTPUTS/DATA/merged_swmeanNM.nii');
+NM_all = spm_read_vols(NM_all_s);
 CR_all_s = NM_all_s;
 
 %% Create CR Maps
@@ -43,6 +47,8 @@ for id = 1:size(NM_all,4)
     fprintf('Subject %g: CR=%g \n', id, CR_mean_all(id,1))
 end
 
-CR_all_s.img = CR_all;
+%CR_all_s.img = CR_all;
 
-save_nii(CR_all_s,'/OUTPUTS/DATA/CR_all.nii');
+%save_nii(CR_all_s,'/OUTPUTS/DATA/CR_all.nii');
+CR_all_s.fname = '/OUTPUTS/DATA/CR_all.nii'
+spm_write_vol(CR_all_s, CR_all)
