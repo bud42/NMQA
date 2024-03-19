@@ -46,9 +46,10 @@ for id = 1:size(NM_all,4)
     CR_mean_L_all(id,1) = mean(nonzeros(CR_L(:)));
     fprintf('Subject %g: CR=%g \n', id, CR_mean_all(id,1))
 end
-
+disp('finished creating maps')
 %CR_all_s.img = CR_all;
 
 %save_nii(CR_all_s,'/OUTPUTS/DATA/CR_all.nii');
+disp('saving')
 CR_all_s.fname = '/OUTPUTS/DATA/CR_all.nii'
 spm_write_vol(CR_all_s, CR_all)
