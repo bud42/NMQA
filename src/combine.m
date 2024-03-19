@@ -3,9 +3,9 @@ fig = spm_figure('CreateWin','Graphics');
 spm('defaults', 'fmri');
 spm_jobman('initcfg');
 
-merged_filename = '/OUTPUTS/DATA/merged_swmeanNM.nii'
+merged_filename = '/OUTPUTS/merged_swmeanNM.nii'
 
-files = spm_select('ExtFPListRec', '/INPUTS/PREPROC', '.*');
+files = spm_select('ExtFPListRec', '/INPUTS', '.*');
 input_filenames = {cellstr(files)};
 
 matlabbatch{1}.spm.util.cat.vols = input_filenames;
