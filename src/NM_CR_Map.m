@@ -51,5 +51,6 @@ disp('finished creating maps');
 
 %save_nii(CR_all_s,'/OUTPUTS/DATA/CR_all.nii');
 disp('saving');
-CR_all_s.fname = {'/OUTPUTS/DATA/CR_all.nii'};
+disp(CR_all_s.fname);
+%CR_all_s.fname = {'/OUTPUTS/DATA/CR_all.nii'};
 spm_write_vol(CR_all_s, CR_all);
