@@ -4,7 +4,7 @@ clc; clear all;
 %NM_mask_s = load_nii('/opt/src/Segmentation.nii');
 %NM_mask = NM_mask_s.img;
 NM_mask_s = spm_vol('/opt/src/Segmentation.nii');
-NM_mask = spm_read_vols(N_mask_s);
+NM_mask = spm_read_vols(NM_mask_s);
 mask_SN_R = ismember(NM_mask,1);
 mask_SN_L = ismember(NM_mask,2);
 mask_CC_R = ismember(NM_mask,3);
