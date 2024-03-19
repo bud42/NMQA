@@ -27,6 +27,8 @@ RUN wget -P /opt https://www.fil.ion.ucl.ac.uk/spm/download/restricted/utopia/sp
     && /opt/spm12/spm12 function exit \
     && chmod +x /opt/spm12/spm12
 
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install libncursesw6 && apt-get clean 
+
 # Help ANTS find itself
 ENV ANTSPATH=/opt/ants/bin
 
