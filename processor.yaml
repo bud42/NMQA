@@ -1,0 +1,36 @@
+---
+containers:
+  - name: NMQA
+    path: nmqa_v2.sif
+    source: docker://bud42/nmqa:v2
+  - name: BASH
+    path: bash_latest.sif
+requirements:
+  walltime: 0-12
+  memory: 16G
+inputs:
+  xnat:
+    subjects:
+      sessions:
+        - types: Baseline
+          assessors:
+            - types: NMQA_v1
+              resources:
+              - resource: DATA
+                fmatch: swmeanNM.nii.gz
+pre:
+  type: singularity_exec
+  container: BASH
+  args: >-
+    bash -c 'mkdir -p /OUTPUTS/DATA/SUBJECTS &&
+    cp -r /INPUTS/* /OUTPUTS/DATA/SUBJECTS/ &&
+    gunzip /OUTPUTS/DATA/SUBJECTS/*/*/*/*/*.nii.gz'
+command:
+  type: singularity_exec
+  container: NMQA
+  args: /bin/bash /opt/src/run_combine.sh
+post:
+  type: singularity_exec
+  container: BASH
+  args: rm -r /OUTPUTS/DATA/SUBJECTS
+description: Project-level NMQA summary.
