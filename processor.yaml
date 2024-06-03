@@ -24,7 +24,7 @@ pre:
   args: >-
     bash -c 'mkdir -p /OUTPUTS/DATA/SUBJECTS &&
     cp -r /INPUTS/* /OUTPUTS/DATA/SUBJECTS/ &&
-    gunzip /OUTPUTS/DATA/SUBJECTS/*/*/*/*/*.nii.gz'
+    gunzip /OUTPUTS/DATA/SUBJECTS/*/*.nii.gz'
 command:
   type: singularity_exec
   container: NMQA
