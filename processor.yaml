@@ -1,11 +1,9 @@
 ---
 containers:
-  - name: BASH
-    path: bash_latest.sif
   - name: NMQA
     path: nmqa_v2.sif
     source: docker://bud42/nmqa:v2
-  - name: POST
+  - name: PREPOST
     path: fs7_post_v1.sif
 requirements:
   walltime: 0-12
@@ -22,7 +20,7 @@ inputs:
                 fmatch: swmeanNM.nii.gz
 pre:
   type: singularity_exec
-  container: BASH
+  container: PREPOST
   args: /bin/bash /REPO/src/analysis/pre.sh
 command:
   type: singularity_exec
@@ -30,7 +28,7 @@ command:
   args: /bin/bash /REPO/src/analysis/main.sh
 post:
   type: singularity_exec
-  container: POST
+  container: PREPOST
   args: /bin/bash /REPO/src/analysis/post.sh
   extraopts: -B $HOME/freesurfer_license.txt:/opt/freesurfer/.license
 description: Project-level NMQA summary with PDF and stats.
