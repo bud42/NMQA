@@ -12,7 +12,7 @@ inputs:
   xnat:
     subjects:
       sessions:
-        - types: Baseline
+        - select: first-mri
           assessors:
             - types: NMQA_v1
               resources:
