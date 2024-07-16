@@ -12,10 +12,9 @@ inputs:
   xnat:
     subjects:
       sessions:
-        - select: first-mri
-          assessors:
-            - types: NMQA_v1
-              resources:
+        - assessors:
+          - types: NMQA_v1
+            resources:
               - resource: DATA
                 fmatch: swmeanNM.nii.gz
 pre:
