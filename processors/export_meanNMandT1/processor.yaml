@@ -14,7 +14,7 @@ inputs:
             resources:
               - resource: DATA
                 fmatch: meanNM.nii.gz,T1.nii.gz
-main:
+command:
   type: singularity_exec
   container: PREPOST
   args: /bin/bash /REPO/src/analysis/pre.sh
