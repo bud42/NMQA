@@ -1,0 +1,20 @@
+---
+containers:
+  - name: PREPOST
+    path: fs7_post_v1.sif
+requirements:
+  walltime: 0-12
+  memory: 16G
+inputs:
+  xnat:
+    subjects:
+      sessions:
+        - assessors:
+          - types: NMQA_v1
+            resources:
+              - resource: DATA
+                fmatch: meanNM.nii.gz,T1.nii.gz
+main:
+  type: singularity_exec
+  container: PREPOST
+  args: /bin/bash /REPO/src/analysis/pre.sh

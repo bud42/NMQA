@@ -16,7 +16,7 @@ inputs:
           - types: NMQA_v1
             resources:
               - resource: DATA
-                fmatch: swmeanNM.nii.gz
+                fmatch: swmeanNM.nii.gz,wmeanNM.nii.gz
 pre:
   type: singularity_exec
   container: PREPOST
@@ -28,6 +28,6 @@ command:
 post:
   type: singularity_exec
   container: PREPOST
-  args: /bin/bash /REPO/src/analysis/post.sh
+  args: /bin/bash /REPO/src/analysis/post-nodelete.sh
   extraopts: -B $HOME/freesurfer_license.txt:/opt/freesurfer/.license
 description: Project-level NMQA summary with PDF and stats.
