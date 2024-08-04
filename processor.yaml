@@ -1,8 +1,8 @@
 ---
 containers:
   - name: NMQA
-    path: nmqa_v2.sif
-    source: docker://bud42/nmqa:v2
+    path: nmqa_v3.sif
+    source: docker://bud42/nmqa:v3
   - name: PREPOST
     path: fs7_post_v1.sif
 requirements:
