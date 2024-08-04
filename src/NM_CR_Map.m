@@ -12,6 +12,10 @@ NM_all_s = spm_vol('/OUTPUTS/DATA/merged_swmeanNM.nii');
 NM_all = spm_read_vols(NM_all_s);
 CR_all_s = NM_all_s;
 
+fid = fopen('/OUTPUTS/stats.csv','w');
+
+fprintf(fid, 'SUBJECT,CR\n');
+
 %% Create CR Maps
 for id = 1:size(NM_all,4)
     NM = NM_all(:,:,:,id);
@@ -41,8 +45,13 @@ for id = 1:size(NM_all,4)
     CR_mean_R_all(id,1) = mean(nonzeros(CR_R(:)));
     CR_mean_L_all(id,1) = mean(nonzeros(CR_L(:)));
     fprintf('Subject %g: CR=%g \n', id, CR_mean_all(id,1))
+
+    fprintf(fid, '%g,%g\n', id, CR_mean_all(id,1));
+
 end
 disp('finished creating maps');
+
+fclose(fid);
 
 disp('saving');
 for n=1:size(CR_all,4)
