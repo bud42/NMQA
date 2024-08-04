@@ -1,2 +1,1 @@
-docker push bud42/nmqa:v1
-
+docker push bud42/nmqa:v3
