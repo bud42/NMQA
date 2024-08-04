@@ -16,7 +16,7 @@ inputs:
           - types: NMQA_v1
             resources:
               - resource: DATA
-                fmatch: swmeanNM.nii.gz,wmeanNM.nii.gz
+                fmatch: swmeanNM.nii.gz
 pre:
   type: singularity_exec
   container: PREPOST
