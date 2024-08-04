@@ -7,7 +7,7 @@ containers:
     path: fs7_post_v1.sif
 requirements:
   walltime: 0-12
-  memory: 16G
+  memory: 64G
 inputs:
   xnat:
     subjects:

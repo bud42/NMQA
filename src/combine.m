@@ -12,7 +12,7 @@ disp(input_filenames);
 
 matlabbatch{1}.spm.util.cat.vols = input_filenames;
 matlabbatch{1}.spm.util.cat.name = merged_filename;
-matlabbatch{1}.spm.util.cat.dtype = 64;
+matlabbatch{1}.spm.util.cat.dtype = 32;
 matlabbatch{1}.spm.util.cat.RT = NaN;
 
 spm_jobman('run', matlabbatch);
