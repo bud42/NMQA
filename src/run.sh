@@ -4,6 +4,7 @@
 # 4. antsRegistrationSyN.sh (rigid) NM to T1
 # 5. antsApplyTransforms NM
 # 6. spm smooth 1mm NM
+# 7. calculate CR
 
 echo "Prepping inputs"
 mkdir /OUTPUTS/DATA
@@ -58,6 +59,10 @@ antsApplyTransforms \
 echo "6. Smoothing NM"
 gunzip wmeanNM.nii.gz
 /opt/spm12/run_spm12.sh /opt/mcr/v92 script /opt/src/smooth.m
-gzip *.nii
 
+echo "7. Calculating CR"
+cp /opt/src/Segmentation.nii /OUTPUTS/DATA/
+/opt/spm12/run_spm12.sh /opt/mcr/v92 script /opt/src/NM_CR_Map_session.m
+
+gzip *.nii
 echo "ALL DONE!"
