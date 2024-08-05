@@ -41,10 +41,10 @@ fprintf('CR=%g\n', CR_mean);
 
 disp('finished creating map');
 
-fid = fopen('stats.csv','w');
-fprintf(fid, 'cr_mean=%g\n' CR_mean);
-fprintf(fid, 'cr_mean_lh=%g\n' CR_mean_L);
-fprintf(fid, 'cr_mean_rh=%g\n' CR_mean_R);
+fid = fopen('stats.csv', 'w');
+fprintf(fid, 'cr_mean=%g\n', CR_mean);
+fprintf(fid, 'cr_mean_lh=%g\n', CR_mean_L);
+fprintf(fid, 'cr_mean_rh=%g\n', CR_mean_R);
 fclose(fid);
 
 disp('saving');
