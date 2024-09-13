@@ -13,7 +13,7 @@ inputs:
     subjects:
       sessions:
         - assessors:
-          - types: NMQA_v1
+          - types: NMQA_v2
             resources:
               - resource: DATA
                 fmatch: swmeanNM.nii.gz
