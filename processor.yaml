@@ -18,6 +18,8 @@ inputs:
             resources:
               - resource: DATA
                 fmatch: swmeanNM.nii.gz
+              - resource: DATA
+                fmatch: CR.nii.gz
 pre:
   type: singularity_exec
   container: PREPOST
