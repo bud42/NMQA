@@ -5,6 +5,7 @@ containers:
     source: docker://bud42/nmqa:v3
   - name: PREPOST
     path: fs7_post_v1.sif
+    source: docker://bud42/fs7_post:v1
 requirements:
   walltime: 0-12
   memory: 64G
