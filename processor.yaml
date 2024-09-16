@@ -3,9 +3,12 @@ containers:
   - name: NMQA
     path: nmqa_v3.sif
     source: docker://bud42/nmqa:v3
-  - name: PREPOST
+  - name: FS7
     path: fs7_post_v1.sif
     source: docker://bud42/fs7_post:v1
+  - name: ANALYSES
+    path: ccmvumc_analyses_v2.sif
+    source: docker://bud42/ccmvumc_analyses:v2
 requirements:
   walltime: 0-12
   memory: 64G
@@ -22,15 +25,15 @@ inputs:
                 fmatch: CR.nii.gz
 pre:
   type: singularity_exec
-  container: PREPOST
+  container: NMQA
   args: /bin/bash /REPO/src/analysis/pre.sh
 command:
   type: singularity_exec
-  container: NMQA
+  container: FS7
   args: /bin/bash /REPO/src/analysis/main.sh
+  extraopts: -B $HOME/freesurfer_license.txt:/opt/freesurfer/.license
 post:
   type: singularity_exec
-  container: PREPOST
-  args: /bin/bash /REPO/src/analysis/post-nodelete.sh
-  extraopts: -B $HOME/freesurfer_license.txt:/opt/freesurfer/.license
+  container: ANALYSES
+  args: /bin/bash /REPO/src/analysis/post.sh
 description: Project-level NMQA summary with PDF and stats.

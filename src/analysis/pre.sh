@@ -21,5 +21,5 @@ for i in *;do
     done
 done
 
-# Decompress for loading in SPM
-gunzip /OUTPUTS/DATA/SUBJECTS/*/*.nii.gz
+# Copy the masks image for screenshots
+cp /opt/src/Segmentation.nii /OUTPUTS/
