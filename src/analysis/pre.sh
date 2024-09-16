@@ -21,5 +21,6 @@ for i in *;do
     done
 done
 
-# Copy the masks image for screenshots
+# Copy the atlas and masks images for screenshots
 cp /opt/src/Segmentation.nii /OUTPUTS/
+cp /opt/ext/tpl-MNI152NLin2009cAsym_res-01_desc-brain_T1w.nii.gz /OUTPUTS/
