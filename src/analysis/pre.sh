@@ -6,14 +6,14 @@ mkdir -p /OUTPUTS/DATA/SUBJECTS
 cd /INPUTS
 
 # Copy subjects to outputs
-for i in *;do
+for i in */;do
 
     cd /INPUTS/$i
 
     for j in *;do
 
         # Copy from inputs to outputs
-        cp -r /INPUTS/$i/$j/assessors/* /OUTPUTS/DATA/SUBJECTS/${j}
+        cp -r /INPUTS/$i$j/assessors/* /OUTPUTS/DATA/SUBJECTS/${j}
 
         # Append to subject list
         echo ${j} >> /OUTPUTS/subjects.txt
