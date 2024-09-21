@@ -1,0 +1,31 @@
+---
+containers:
+  - name: NMQA
+    path: nmqa_v3.sif
+    source: docker://bud42/nmqa:v3
+  - name: ANALYSES
+    path: ccmvumc_analyses_v2.sif
+    source: docker://bud42/ccmvumc_analyses:v2
+requirements:
+  walltime: 0-12
+  memory: 64G
+inputs:
+  xnat:
+    subjects:
+      sessions:
+        - assessors:
+          - types: NMQA_v2
+            resources:
+              - resource: DATA
+                fmatch: swmeanNM.nii.gz
+              - resource: DATA
+                fmatch: CR.nii.gz
+pre:
+  type: singularity_exec
+  container: NMQA
+  args: /bin/bash /REPO/src/analysis/pre.sh
+command:
+  type: singularity_exec
+  container: ANALYSES
+  args: python -u /REPO/src/analysis/covars.py
+description: Project-level NMQA stats

@@ -16,18 +16,6 @@ PTHRESH = 0.05
 CTHRESH = 1
 
 
-# Merge CR images from all sessions to 4d image
-#print(f'merging CR:{cr_files=}')
-#cr_images = nib.funcs.concat_images(cr_files)
-#nib.save(cr_images, '/OUTPUTS/DATA/merged_CR.nii.gz')
-#make_mean_image(cr_files, )
-
-# Merge smoothed and warped Neuromelanin images from all sessions to 4d image
-#print(f'merging NM:{nm_files=}')
-#nm_images = nib.funcs.concat_images(nm_files)
-#nib.save(nm_images, '/OUTPUTS/DATA/merged_NM.nii.gz')
-
-
 if not os.path.exists(CSV_FILE):
     raise Exception('no csv file, cannot run covars')
 
@@ -46,8 +34,11 @@ with PdfPages('/OUTPUTS/covars.pdf') as pdf:
     df = df[df['id'].isin(subjects)]
 
     # Get baseline scans only
-    cr_files = [f'/OUTPUTS/DATA/SUBJECTS/{x}a/CR.nii.gz' for x in subjects]
-    nm_files = [f'/OUTPUTS/DATA/SUBJECTS/{x}a/swmeanNM.nii.gz' for x in subjects]
+    cr_files = sorted([f'/OUTPUTS/DATA/SUBJECTS/{x}a/CR.nii.gz' for x in subjects])
+    nm_files = sorted([f'/OUTPUTS/DATA/SUBJECTS/{x}a/swmeanNM.nii.gz' for x in subjects])
+
+    if len(cr_files) != len(nm_files):
+        raise Exception('unequal number of images found for CR/NM')
 
     # Import covariate data
     subject_count = len(df)

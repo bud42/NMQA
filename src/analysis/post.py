@@ -15,7 +15,7 @@ MASK_FILE = '/OUTPUTS/Segmentation.nii'
 ATLAS_FILE = '/OUTPUTS/tpl-MNI152NLin2009cAsym_res-01_desc-brain_T1w.nii.gz'
 AXIAL_SLICES = (-19, -18, -17, -16, -15, -14, -13, -12, -11, -10)
 TITLE = 'Neuromelanin Summary (NMQA_v2)'
-TITLE += '\nSubstantia Nigra(SN) Crus Cerebri(CC) Contrast Ratio(CR)\nCR = (CC voxel - mean SN) / (mean SN)'
+TITLE += '\nSubstantia Nigra(SN) Crus Cerebri(CC) Contrast Ratio(CR)\nvoxel CR = [voxel SN - mean CC] / mean CC'
 
 
 # Find data
@@ -84,7 +84,6 @@ with PdfPages('/OUTPUTS/report.pdf') as pdf:
         alpha=1.0,
         cut_coords=AXIAL_SLICES,
         axes=ax[1],
-        #title='Masks (MNI atlas)'
     )
 
     # Zoom by setting axis limits
@@ -115,7 +114,6 @@ with PdfPages('/OUTPUTS/report.pdf') as pdf:
         cut_coords=AXIAL_SLICES,
         axes=ax[3],
         colorbar=False,
-        #title='Mean CR (Mean NM)',
         annotate=True,
         vmin=0,
         vmax=0.5,
@@ -133,9 +131,9 @@ with PdfPages('/OUTPUTS/report.pdf') as pdf:
     df = pd.concat([df, pd.DataFrame({'RCR': apply_mask(mean_cr, rh_mask)})])
     df = pd.concat([df, pd.DataFrame({'TCR': apply_mask(mean_cr, tot_mask)})])
     df = df.rename(columns={
-        'LCR': f'Left Contrast Ratio\nmean={df.LCR.mean():.2f}', 
-        'RCR': f'Right Contrast Ratio\nmean={df.RCR.mean():.2f}', 
-        'TCR': f'Total Contrast Ratio\nmean={df.TCR.mean():.2f}', 
+        'LCR': f'Left CR\nmean={df.LCR.mean():.2f}', 
+        'RCR': f'Right CR\nmean={df.RCR.mean():.2f}', 
+        'TCR': f'Total CR\nmean={df.TCR.mean():.2f}', 
     })
 
     # Create the boxplot of CR value
