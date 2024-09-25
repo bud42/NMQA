@@ -12,9 +12,9 @@ from nilearn.glm.second_level import SecondLevelModel
 from nilearn.glm import threshold_stats_img
 from nilearn.image import load_img
 
-
+SUBJECTS_FILE = '/OUTPUTS/subjects.txt'
 MASK_FILE = '/REPO/src/Segmentation.nii'
-OUTPDF = '/OUTPUTS/covars.pdf'
+OUTPDF = '/OUTPUTS/report.pdf'
 OUTRPT = '/OUTPUTS/report.html'
 CSV_FILE = '/INPUTS/covariates.csv'
 AXIAL_SLICES = (-17, -16, -15, -14, -13)
@@ -385,6 +385,10 @@ def main():
 
     df = df.set_index('id')
     df = df.loc[image_subjects]
+
+    with open(SUBJECTS_FILE, 'w') as f:
+        for s in subjects:
+            f.write(f"{s}\n")
 
     # Load mean CR means for each subject
     df['IMAGE'] = image_files
