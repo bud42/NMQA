@@ -18,5 +18,5 @@ inputs:
 command:
   type: singularity_exec
   container: ANALYSES
-  args: python -u /REPO/src/analysis/covars.py
+  args: bash -c "pip install seaborn && python -u /REPO/src/analysis/covars.py"
 description: Project-level NMQA stats
