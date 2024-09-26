@@ -10,7 +10,8 @@ import matplotlib.pyplot as plt
 from nilearn.plotting import plot_stat_map, plot_design_matrix
 from nilearn.glm.second_level import SecondLevelModel
 from nilearn.glm import threshold_stats_img
-from nilearn.image import load_img
+from nilearn.image import load_img, math_img
+
 
 SUBJECTS_FILE = '/OUTPUTS/subjects.txt'
 MASK_FILE = '/REPO/src/Segmentation.nii'
@@ -18,18 +19,17 @@ OUTPDF = '/OUTPUTS/report.pdf'
 OUTRPT = '/OUTPUTS/report.html'
 CSV_FILE = '/INPUTS/covariates.csv'
 AXIAL_SLICES = (-17, -16, -15, -14, -13)
+MULTI_SLICES = (10, -18, -16)
 PTHRESH = 0.05
 CTHRESH = 0
 TITLE = 'Neuromelanin Contrast Ratio voxelwise stats'
+lh_mask = math_img("img == 2", img=MASK_FILE)
+rh_mask = math_img("img == 1", img=MASK_FILE)
 
 
 def pair_covars(df, pdf):
-    # Plot covariates
-    print('Plotting covariates')
-
     # Full design matrix
     subject_count = len(df)
-    print(f'n={subject_count}')
     age = df['AGE'].astype(float)
     age = (age - age.mean()) / age.std()
     sex = df['SEX']
@@ -40,15 +40,13 @@ def pair_covars(df, pdf):
     group_all, group_all_key = pd.factorize(group)
 
     # Comparing age
-    print('Building age model')
     design_matrix = pd.DataFrame({
-        "age": age,
-        "sex": sex_all,
-        "group": group_all,
-        "speed": speed,
+        "AGE": age,
+        "SEX": sex_all,
+        "GROUP": group_all,
+        "SPEED": speed,
         "intercept": [1] * subject_count,
     })
-    print(design_matrix)
 
     # Creat figure for covariates page
     fig, ax = plt.subplots(1, 5, figsize=(8.5,11))
@@ -93,19 +91,16 @@ def test_report(df, images):
     group_all, group_all_key = pd.factorize(df['GROUP'])
 
     # Comparing age
-    print('Building model')
     subject_count = len(df)
     df['AGE'] = df['AGE'].astype(float)
     df['SPEED'] = df['SPEED'].astype(float)
     design_matrix = pd.DataFrame({
-        "age": (df['AGE'] - df['AGE'].mean()) / df['AGE'].std(),
-        "sex": sex_all,
-        "group": group_all,
-        "speed": (df['SPEED'] - df['SPEED'].mean()) / df['SPEED'].std(),
+        "AGE": (df['AGE'] - df['AGE'].mean()) / df['AGE'].std(),
+        "SEX": sex_all,
+        "GROUP": group_all,
+        "SPEED": (df['SPEED'] - df['SPEED'].mean()) / df['SPEED'].std(),
         "intercept": [1] * subject_count,
     })
-    print(design_matrix)
-    print(subject_count)
 
     print('Fitting full model')
     second_level_model = SecondLevelModel().fit(
@@ -117,17 +112,74 @@ def test_report(df, images):
     report = make_glm_report(
         model=second_level_model,
         alpha=PTHRESH,
-        contrasts=["age", "sex", "group", "speed"],
+        contrasts=["AGE", "SEX", "GROUP", "SPEED"],
     )
 
     print('save report')
     report.save_as_html(OUTRPT)
 
 
+def add_masks(disp):
+    # Trace the masks
+    disp.add_contours(
+        lh_mask, levels=[0.5], colors='green', linewidths=1.0, alpha=1.0)
+    disp.add_contours(
+        rh_mask, levels=[0.5], colors='red', linewidths=1.0, alpha=1.0)
+
+
+def _plot_voxels(voxels, count, name, ax):
+    # Apply pval and cluster size thresholds
+    thr_voxels, thr = threshold_stats_img(
+        voxels,
+        alpha=PTHRESH,
+        cluster_threshold=CTHRESH
+    )
+
+    # Plot the thresholded zmap for speed
+    disp = plot_stat_map(
+        thr_voxels,
+        threshold=thr,
+        colorbar=False,
+        display_mode='yz',
+        cut_coords=[-18,-15],
+        draw_cross=False,
+        title= f'{name} GLM p < {PTHRESH}, k > {CTHRESH} (n={count})',
+        axes=ax[0],
+        alpha=1.0,
+        black_bg=True,
+    )
+
+    add_masks(disp)
+
+    # Zoom by setting axis limits
+    for cut_ax in disp.axes.values():
+        cut_ax.ax.set_xlim(-18, 18)
+        cut_ax.ax.set_ylim(-35, 0)
+
+    disp = plot_stat_map(
+        thr_voxels,
+        threshold=thr,
+        colorbar=True,
+        display_mode='x',
+        cut_coords=(-8,8),
+        draw_cross=False,
+        axes=ax[1],
+        alpha=1.0,
+        black_bg=True,
+        bg_img=BG_FILE,
+    )
+
+    add_masks(disp)
+
+    # Zoom by setting axis limits
+    for cut_ax in disp.axes.values():
+        cut_ax.ax.set_xlim(-30, -5)
+        cut_ax.ax.set_ylim(-35, -5)
+
+
 def voxelwise_covars(image_files, df, pdf):
     # Import covariate data
-    subject_count = len(df)
-    print(f'n={subject_count}')
+    count = len(df)
     age = df['AGE'].astype(float)
     age = (age - age.mean()) / age.std()
     speed = df['SPEED'].astype(float)
@@ -136,216 +188,51 @@ def voxelwise_covars(image_files, df, pdf):
     group = df['GROUP']
 
     # one sample t-test
-    design = pd.DataFrame([1] * subject_count, columns=["intercept"])
+    design = pd.DataFrame([1] * count, columns=["intercept"])
     model = SecondLevelModel().fit(image_files, design_matrix=design)
     z_map = model.compute_contrast()
 
     # Comparing age
-    print('Building age model')
-    design_matrix_age = pd.DataFrame({
-        "age": age,
-        "intercept": np.ones(subject_count)
-    })
-
-    # Fit a model for CR vs age
-    print('Fitting model')
-    model = SecondLevelModel().fit(
-        image_files,
-        design_matrix=design_matrix_age
-    )
-
-    # Get the age single t-test
-    print('Computing contrast')
-    age_z_map = model.compute_contrast(
-        second_level_contrast=[1, 0],
-        output_type="z_score"
-    )
-
-    # Apply pval and cluster size thresholds
-    print('Thresholding stats')
-    age_thr_map, age_thr = threshold_stats_img(
-        age_z_map,
-        alpha=PTHRESH,
-        cluster_threshold=CTHRESH
-    )
+    design_age = pd.DataFrame({"age": age, "intercept": np.ones(count)})
+    model = SecondLevelModel().fit(image_files, design_matrix=design_age)
+    age_z_map = model.compute_contrast([1, 0])
 
     # Now compare sexes
-    print('Comparing sexes')
     sex_all, sex_all_key = pd.factorize(sex)
-    design_matrix_sex = pd.DataFrame({
-        "sex": sex_all,
-        "intercept": np.ones(subject_count),
-    })
-
-    print('Fitting model')
-    model = SecondLevelModel().fit(
-        image_files,
-        design_matrix=design_matrix_sex)
-
-    print('Computing contrast')
+    design_sex = pd.DataFrame({"sex": sex_all, "intercept": np.ones(count)})
+    model = SecondLevelModel().fit(image_files, design_matrix=design_sex)
     sex_z_map = model.compute_contrast([1,0])
 
-    # Apply pval and cluster size thresholds
-    print('Thresholding stats')
-    sex_thr_map, sex_thr = threshold_stats_img(
-        sex_z_map,
-        alpha=PTHRESH,
-        cluster_threshold=CTHRESH
-    )
-
     # Compare groups
-    print('Comparing groups')
     group_all, group_all_key = pd.factorize(group)
-    design_matrix_group = pd.DataFrame({
+    design_group = pd.DataFrame({
         "group": group_all,
-        "intercept": np.ones(subject_count),
+        "intercept": np.ones(count)
     })
-
-    print('Fitting model')
-    model = SecondLevelModel().fit(
-        image_files,
-        design_matrix=design_matrix_group)
-
-    print('Computing contrast')
+    model = SecondLevelModel().fit(image_files, design_matrix=design_group)
     group_z_map = model.compute_contrast([1,0])
 
-    # Apply pval and cluster size thresholds
-    print('Thresholding stats')
-    group_thr_map, group_thr = threshold_stats_img(
-        group_z_map,
-        alpha=PTHRESH,
-        cluster_threshold=CTHRESH
-    )
-
     # Compare soeed
-    print('Comparing speed')
-    design_matrix_speed = pd.DataFrame({
-        "speed": speed,
-        "intercept": np.ones(subject_count),
-    })
-
-    print('Fitting speed model')
-    model = SecondLevelModel().fit(
-        image_files,
-        design_matrix=design_matrix_speed)
-
-    print('Computing speed contrast')
+    design_speed = pd.DataFrame({"speed": speed, "intercept": np.ones(count)})
+    model = SecondLevelModel().fit(image_files, design_matrix=design_speed)
     speed_z_map = model.compute_contrast([1,0])
 
-    # Apply pval and cluster size thresholds
-    print('Thresholding speed stats')
-    speed_thr_map, speed_thr = threshold_stats_img(
-        speed_z_map,
-        alpha=PTHRESH,
-        cluster_threshold=CTHRESH
-    )
-
-    # Creat figure for covariates page
-    fig, ax = plt.subplots(5, 1, figsize=(8.5,11))
+    # Make plots
+    fig, ax = plt.subplots(5, 2, figsize=(8.5,11))
     fig.suptitle(TITLE)
     plt.subplots_adjust(
         left=0.07,
         bottom=0.07,
         right=0.93,
         top=0.93,
-        wspace=0.1,
-        hspace=0.015,
+        wspace=0.0,
+        hspace=0.05,
     )
-
-    # Plot zmap 
-    print('Plotting default zmap')
-    disp = plot_stat_map(
-        z_map,
-        colorbar=True,
-        display_mode="z",
-        cut_coords=AXIAL_SLICES,
-        title=f'default (n={subject_count})',
-        axes=ax[0],
-        alpha=1.0,
-        black_bg=True,
-    )
-
-    # Zoom by setting axis limits
-    for cut_ax in disp.axes.values():
-        cut_ax.ax.set_xlim(-22, 22)
-        cut_ax.ax.set_ylim(-44, 4)
-
-    # Plot the thresholded zmap of age
-    print('Plotting age')
-    disp = plot_stat_map(
-        age_thr_map,
-        threshold=age_thr,
-        colorbar=True,
-        display_mode="z",
-        cut_coords=AXIAL_SLICES,
-        title=f'Age GLM p < {PTHRESH}, k > {CTHRESH} (n={subject_count})',
-        axes=ax[1],
-        alpha=1.0,
-        black_bg=True,
-    )
-
-    # Zoom by setting axis limits
-    for cut_ax in disp.axes.values():
-        cut_ax.ax.set_xlim(-22, 22)
-        cut_ax.ax.set_ylim(-44, 4)
-
-    # Plot the thresholded zmap of sex
-    print('Plotting sexes')
-    disp = plot_stat_map(
-        sex_thr_map,
-        threshold=sex_thr,
-        colorbar=True,
-        display_mode="z",
-        cut_coords=AXIAL_SLICES,
-        title=f'Sex GLM p < {PTHRESH}, k > {CTHRESH} (n={subject_count})',
-        axes=ax[2],
-        alpha=1.0,
-        black_bg=True,
-    )
-
-    # Zoom by setting axis limits
-    for cut_ax in disp.axes.values():
-        cut_ax.ax.set_xlim(-22, 22)
-        cut_ax.ax.set_ylim(-44, 4)
-
-    # Plot the thresholded zmap for group
-    print('Plotting groups')
-    disp = plot_stat_map(
-        group_thr_map,
-        threshold=group_thr,
-        colorbar=True,
-        display_mode="z",
-        cut_coords=AXIAL_SLICES,
-        title=f'Group GLM p < {PTHRESH}, k > {CTHRESH} (n={subject_count})',
-        axes=ax[3],
-        alpha=1.0,
-        black_bg=True,
-    )
-
-    # Zoom by setting axis limits
-    for cut_ax in disp.axes.values():
-        cut_ax.ax.set_xlim(-22, 22)
-        cut_ax.ax.set_ylim(-44, 4)
-
-    # Plot the thresholded zmap for speed
-    print('Plotting speed')
-    disp = plot_stat_map(
-        speed_thr_map,
-        threshold=speed_thr,
-        colorbar=True,
-        display_mode="z",
-        cut_coords=AXIAL_SLICES,
-        title=f'Speed GLM p < {PTHRESH}, k > {CTHRESH} (n={subject_count})',
-        axes=ax[4],
-        alpha=1.0,
-        black_bg=True,
-    )
-
-    # Zoom by setting axis limits
-    for cut_ax in disp.axes.values():
-        cut_ax.ax.set_xlim(-22, 22)
-        cut_ax.ax.set_ylim(-44, 4)
-
+    _plot_voxels(z_map, count, 'default', ax[0])
+    _plot_voxels(age_z_map, count, 'Age', ax[1])
+    _plot_voxels(sex_z_map, count, 'Sex', ax[2])
+    _plot_voxels(group_z_map, count, 'Group', ax[3])
+    _plot_voxels(speed_z_map, count, 'Speed', ax[4])
 
     # Finish page and save
     pdf.savefig(fig, dpi=300)
@@ -373,7 +260,6 @@ def main():
     # Load covariates from csv file to pandas dataframe
     print(f'loading csv:{CSV_FILE}')
     df = pd.read_csv(CSV_FILE)
-    print(df)
 
     # Filter subjects to get intersection of images and covariates
     subjects = df.id.unique()
@@ -387,7 +273,7 @@ def main():
     df = df.loc[image_subjects]
 
     with open(SUBJECTS_FILE, 'w') as f:
-        for s in subjects:
+        for s in image_subjects:
             f.write(f"{s}\n")
 
     # Load mean CR means for each subject
