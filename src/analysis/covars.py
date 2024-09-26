@@ -4,13 +4,13 @@ import os
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from pandas.plotting import scatter_matrix
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
 from nilearn.plotting import plot_stat_map, plot_design_matrix
 from nilearn.glm.second_level import SecondLevelModel
 from nilearn.glm import threshold_stats_img
 from nilearn.image import load_img, math_img
+from nilearn.reporting import make_glm_report
 
 
 SUBJECTS_FILE = '/OUTPUTS/subjects.txt'
@@ -19,7 +19,6 @@ OUTPDF = '/OUTPUTS/report.pdf'
 OUTRPT = '/OUTPUTS/report.html'
 CSV_FILE = '/INPUTS/covariates.csv'
 AXIAL_SLICES = (-17, -16, -15, -14, -13)
-MULTI_SLICES = (10, -18, -16)
 PTHRESH = 0.05
 CTHRESH = 0
 TITLE = 'Neuromelanin Contrast Ratio voxelwise stats'
@@ -27,27 +26,7 @@ lh_mask = math_img("img == 2", img=MASK_FILE)
 rh_mask = math_img("img == 1", img=MASK_FILE)
 
 
-def pair_covars(df, pdf):
-    # Full design matrix
-    subject_count = len(df)
-    age = df['AGE'].astype(float)
-    age = (age - age.mean()) / age.std()
-    sex = df['SEX']
-    group = df['GROUP']
-    speed = df['SPEED'].astype(float)
-    speed = (speed - speed.mean()) / speed.std()
-    sex_all, sex_all_key = pd.factorize(sex)
-    group_all, group_all_key = pd.factorize(group)
-
-    # Comparing age
-    design_matrix = pd.DataFrame({
-        "AGE": age,
-        "SEX": sex_all,
-        "GROUP": group_all,
-        "SPEED": speed,
-        "intercept": [1] * subject_count,
-    })
-
+def _plot_design(design, pdf):
     # Creat figure for covariates page
     fig, ax = plt.subplots(1, 5, figsize=(8.5,11))
     fig.suptitle(TITLE)
@@ -65,7 +44,7 @@ def pair_covars(df, pdf):
 
     # Plot colorful view of GLM design
     plot_design_matrix(
-        design_matrix,
+        design,
         ax=ax[2])
 
     ax[3].axis('off')
@@ -75,7 +54,9 @@ def pair_covars(df, pdf):
     pdf.savefig(fig, dpi=300)
     plt.close(fig)
 
-    # seaborn pairplot
+
+def _pairplots(df, pdf):
+    # seaborn pairplot without grouping, then group by sex, then subject group
     sns.pairplot(df)
     pdf.savefig(plt.gcf(), dpi=300)
     sns.pairplot(df, hue='SEX')
@@ -84,9 +65,7 @@ def pair_covars(df, pdf):
     pdf.savefig(plt.gcf(), dpi=300)
 
 
-def test_report(df, images):
-    from nilearn.reporting import make_glm_report
-
+def _glm_report(df, images):
     sex_all, sex_all_key = pd.factorize(df['SEX'])
     group_all, group_all_key = pd.factorize(df['GROUP'])
 
@@ -119,7 +98,7 @@ def test_report(df, images):
     report.save_as_html(OUTRPT)
 
 
-def add_masks(disp):
+def _add_masks(disp):
     # Trace the masks
     disp.add_contours(
         lh_mask, levels=[0.5], colors='green', linewidths=1.0, alpha=1.0)
@@ -135,7 +114,7 @@ def _plot_voxels(voxels, count, name, ax):
         cluster_threshold=CTHRESH
     )
 
-    # Plot the thresholded zmap for speed
+    # Plot the thresholded zmap coronal and axial views
     disp = plot_stat_map(
         thr_voxels,
         threshold=thr,
@@ -149,13 +128,15 @@ def _plot_voxels(voxels, count, name, ax):
         black_bg=True,
     )
 
-    add_masks(disp)
+    # Trace masks
+    _add_masks(disp)
 
     # Zoom by setting axis limits
     for cut_ax in disp.axes.values():
         cut_ax.ax.set_xlim(-18, 18)
         cut_ax.ax.set_ylim(-35, 0)
 
+    # Plot sagittal views
     disp = plot_stat_map(
         thr_voxels,
         threshold=thr,
@@ -166,10 +147,10 @@ def _plot_voxels(voxels, count, name, ax):
         axes=ax[1],
         alpha=1.0,
         black_bg=True,
-        bg_img=BG_FILE,
     )
 
-    add_masks(disp)
+    # Trace masks
+    _add_masks(disp)
 
     # Zoom by setting axis limits
     for cut_ax in disp.axes.values():
@@ -177,7 +158,7 @@ def _plot_voxels(voxels, count, name, ax):
         cut_ax.ax.set_ylim(-35, -5)
 
 
-def voxelwise_covars(image_files, df, pdf):
+def _voxelwise(image_files, df, pdf):
     # Import covariate data
     count = len(df)
     age = df['AGE'].astype(float)
@@ -187,37 +168,33 @@ def voxelwise_covars(image_files, df, pdf):
     sex = df['SEX']
     group = df['GROUP']
 
-    # one sample t-test
-    design = pd.DataFrame([1] * count, columns=["intercept"])
-    model = SecondLevelModel().fit(image_files, design_matrix=design)
-    z_map = model.compute_contrast()
-
-    # Comparing age
-    design_age = pd.DataFrame({"age": age, "intercept": np.ones(count)})
-    model = SecondLevelModel().fit(image_files, design_matrix=design_age)
-    age_z_map = model.compute_contrast([1, 0])
-
-    # Now compare sexes
+    # Factorize categorical variables
     sex_all, sex_all_key = pd.factorize(sex)
-    design_sex = pd.DataFrame({"sex": sex_all, "intercept": np.ones(count)})
-    model = SecondLevelModel().fit(image_files, design_matrix=design_sex)
-    sex_z_map = model.compute_contrast([1,0])
-
-    # Compare groups
     group_all, group_all_key = pd.factorize(group)
-    design_group = pd.DataFrame({
-        "group": group_all,
-        "intercept": np.ones(count)
+
+    # Build our design matrix
+    design = pd.DataFrame({
+        "AGE": age,
+        "SEX": sex_all,
+        "GROUP": group_all,
+        "SPEED": speed,
+        "intercept": [1] * count,
     })
-    model = SecondLevelModel().fit(image_files, design_matrix=design_group)
-    group_z_map = model.compute_contrast([1,0])
 
-    # Compare soeed
-    design_speed = pd.DataFrame({"speed": speed, "intercept": np.ones(count)})
-    model = SecondLevelModel().fit(image_files, design_matrix=design_speed)
-    speed_z_map = model.compute_contrast([1,0])
+    # Fit our model
+    model = SecondLevelModel().fit(image_files, design_matrix=design)
 
-    # Make plots
+    # Make contrast images
+    def_z_map = model.compute_contrast([0, 0, 0, 0, 1])
+    age_z_map = model.compute_contrast([1, 0, 0, 0, 0])
+    sex_z_map = model.compute_contrast([0, 1, 0, 0, 0])
+    grp_z_map = model.compute_contrast([0, 0, 1, 0, 0])
+    spd_z_map = model.compute_contrast([0, 0, 0, 1, 0])
+
+    # Plot design matrix page
+    _plot_design(design, pdf)
+
+    # Make plots of contrasts
     fig, ax = plt.subplots(5, 2, figsize=(8.5,11))
     fig.suptitle(TITLE)
     plt.subplots_adjust(
@@ -228,18 +205,19 @@ def voxelwise_covars(image_files, df, pdf):
         wspace=0.0,
         hspace=0.05,
     )
-    _plot_voxels(z_map, count, 'default', ax[0])
+
+    _plot_voxels(def_z_map, count, 'intercept', ax[0])
     _plot_voxels(age_z_map, count, 'Age', ax[1])
     _plot_voxels(sex_z_map, count, 'Sex', ax[2])
-    _plot_voxels(group_z_map, count, 'Group', ax[3])
-    _plot_voxels(speed_z_map, count, 'Speed', ax[4])
+    _plot_voxels(grp_z_map, count, 'Group', ax[3])
+    _plot_voxels(spd_z_map, count, 'Speed', ax[4])
 
     # Finish page and save
     pdf.savefig(fig, dpi=300)
     plt.close(fig)
 
 
-def get_means(row):
+def _get_means(row):
     mask = load_img(MASK_FILE).get_fdata()
     data = load_img(row['IMAGE']).get_fdata()
 
@@ -262,31 +240,34 @@ def main():
     df = pd.read_csv(CSV_FILE)
 
     # Filter subjects to get intersection of images and covariates
-    subjects = df.id.unique()
-    for subj in subjects:
+    for subj in df.id.unique():
         subj_files = glob(f'/INPUTS/{subj}/*a/assessors/*/CR.nii.gz')
         if subj_files:
             image_subjects.append(subj)
             image_files.append(subj_files[0])
 
+    # Set index and select subjects by id
     df = df.set_index('id')
     df = df.loc[image_subjects]
 
+    # Write list of subjects to text file
     with open(SUBJECTS_FILE, 'w') as f:
         for s in image_subjects:
             f.write(f"{s}\n")
 
     # Load mean CR means for each subject
     df['IMAGE'] = image_files
-    df = df.apply(get_means, axis=1)
+    df = df.apply(_get_means, axis=1)
 
+    # Make reports
     print('Making nilearn.glm report')
-    test_report(df, image_files)
+    _glm_report(df, image_files)
 
-    print('Making report')
+    print('Making voxelwise report')
     with PdfPages(OUTPDF) as pdf:
-        pair_covars(df, pdf)
-        voxelwise_covars(image_files, df, pdf)
+        _voxelwise(image_files, df, pdf)
+        _pairplots(df, pdf)
+
 
     print('Done!')
 
