@@ -1,7 +1,7 @@
 clc; clear all;
 
 %% Load Data
-NM_mask_s = spm_vol('lr_SN_group_segncc_3_ncut_new.nii');
+NM_mask_s = spm_vol('rlr_SN_group_segncc_3_ncut_new.nii');
 NM_mask = spm_read_vols(NM_mask_s);
 mask_SN_1 = ismember(NM_mask,1);
 mask_SN_2 = ismember(NM_mask,2);
