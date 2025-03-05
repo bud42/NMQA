@@ -1,8 +1,8 @@
 ---
 containers:
   - name: NMQA
-    path: nmqa_v3.sif
-    source: docker://bud42/nmqa:v3
+    path: nmqa_v3.1.sif
+    source: docker://bud42/nmqa:v3.1
   - name: FS7
     path: fs7_post_v1.sif
     source: docker://bud42/fs7_post:v1
@@ -17,7 +17,7 @@ inputs:
     subjects:
       sessions:
         - assessors:
-          - types: NMQA_v2
+          - types: NMQA_v3
             resources:
               - resource: DATA
                 fmatch: swmeanNM.nii.gz
