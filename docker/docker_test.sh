@@ -1,5 +1,5 @@
 XNATHOST="https://xnat.vanderbilt.edu/xnat"
-TESTDIR="$HOME/TEST-nmqa"
+TESTDIR="$HOME/TEST-NMQA_v3.1"
 
 if [ -d "$TESTDIR/" ]; then
     echo "Already exists, delete first"
