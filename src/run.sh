@@ -64,5 +64,9 @@ echo "7. Calculating CR"
 cp /opt/src/Segmentation.nii /OUTPUTS/DATA/
 /opt/spm12/run_spm12.sh /opt/mcr/v92 script /opt/src/NM_CR_Map_session.m
 
+echo "8. Calculating CR part 2"
+cp /opt/src/Segmentation.nii /OUTPUTS/DATA/
+/opt/spm12/run_spm12.sh /opt/mcr/v92 script /opt/src/NM_CR_Map_session_part2.m
+
 gzip *.nii
 echo "ALL DONE!"

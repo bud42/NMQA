@@ -1,1 +1,1 @@
-docker push bud42/nmqa:v3
+docker push bud42/nmqa:v3.1
