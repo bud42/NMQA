@@ -52,7 +52,7 @@ fprintf('CR3=%g\n', CR_mean_3);
 
 disp('finished creating map');
 
-fid = fopen('stats.csv', 'w');
+fid = fopen('stats.csv', 'a+');
 fprintf(fid, 'cr_mean_sn1=%g\n', CR_mean_1);
 fprintf(fid, 'cr_mean_sn2=%g\n', CR_mean_2);
 fprintf(fid, 'cr_mean_sn3=%g\n', CR_mean_2);
