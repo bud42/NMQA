@@ -42,6 +42,8 @@ CR_1(CR_1<0)=0;
 CR_2(CR_2<0)=0;
 CR_3(CR_3<0)=0;
 
+CR = CR_1 + CR_2 + CR_3;
+
 CR_mean_1 = mean(nonzeros(CR_1(:)));
 CR_mean_2 = mean(nonzeros(CR_2(:)));
 CR_mean_3 = mean(nonzeros(CR_3(:)));
@@ -59,5 +61,5 @@ fprintf(fid, 'cr_mean_sn3=%g\n', CR_mean_2);
 fclose(fid);
 
 disp('saving');
-CR_s.fname = 'CR.nii';
+CR_s.fname = 'CR_part2.nii';
 spm_write_vol(CR_s, CR);
