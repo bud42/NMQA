@@ -9,8 +9,9 @@ mask_SN_3 = ismember(NM_mask,3);
 
 CC_mask_s = spm_vol('Segmentation.nii');
 CC_mask = spm_read_vols(CC_mask_s);
-mask_CC = CC_mask;
-mask_CC(mask_CC>0)=1;
+mask_CC_R = ismember(CC_mask,3);
+mask_CC_L = ismember(CC_mask,4);
+mask_CC = mask_CC_R + mask_CC_L;
 
 NM_s = spm_vol('swmeanNM.nii');
 NM = spm_read_vols(NM_s);
