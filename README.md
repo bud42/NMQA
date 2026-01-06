@@ -22,3 +22,7 @@ TODO: CNR at each voxel in the NM-MRI image was calculated as the percent signal
 
 CNRV = {[IV - mode(ICC)] / mode(ICC)}*100 
 (signal − reference) / reference * 100, where reference is the modal based on a kernel distribution fit
+
+
+ROIs for sn1,sn2,sn3:
+https://www.neurovault.org/collections/2860/
