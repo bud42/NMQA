@@ -11,31 +11,37 @@ from nilearn.image import math_img, binarize_img, mean_img
 from nilearn.masking import apply_mask
 
 
+SUBREGIONS_FILE = '/OUTPUTS/lr_SN_group_segncc_3_ncut_new.nii'
 MASK_FILE = '/OUTPUTS/Segmentation.nii'
 ATLAS_FILE = '/OUTPUTS/tpl-MNI152NLin2009cAsym_res-01_desc-brain_T1w.nii.gz'
 AXIAL_SLICES = (-19, -18, -17, -16, -15, -14, -13, -12, -11, -10)
-TITLE = 'Neuromelanin Summary (NMQA_v2)'
+TITLE = 'Neuromelanin Summary (NMQA_v4)'
 TITLE += '\nSubstantia Nigra(SN) Crus Cerebri(CC) Contrast Ratio(CR)\nvoxel CR = [voxel SN - mean CC] / mean CC'
-
 
 # Find data
 sessions = os.listdir('/OUTPUTS/DATA/SUBJECTS')
+sessions = [x for x in sessions if x.endswith('a')]
 print(f'{sessions=}')
 
-cr_files = sorted(glob.glob('/OUTPUTS/DATA/SUBJECTS/*/CR*.nii.gz'))
-nm_files = sorted(glob.glob('/OUTPUTS/DATA/SUBJECTS/*/sw*.nii.gz'))
+cr_files = sorted(glob.glob('/OUTPUTS/DATA/SUBJECTS/*a/CR*.nii'))
+nm_files = sorted(glob.glob('/OUTPUTS/DATA/SUBJECTS/*a/sw*.nii'))
 
 if len(cr_files) != len(nm_files):
     raise Exception('unequal number of images found for CR/NM')
 
 # Make means
+print('make mean CR .nii')
 mean_cr = mean_img(cr_files)
+print('make mean NM .nii')
 mean_nm = mean_img(nm_files)
 
 # Make merged for voxelwise stats
-nib.funcs.concat_images(cr_files).to_filename('/OUTPUTS/DATA/CR_all.nii.gz')
+#print('concat CR images...')
+#nib.funcs.concat_images(cr_files).to_filename('/OUTPUTS/DATA/CR_all.nii.gz')
+#print('finished concat')
 
 # Make masks of each ROI
+print('make masks')
 lh_mask = math_img("img == 2", img=MASK_FILE)
 lh_mask.to_filename('/OUTPUTS/DATA/lh_mask.nii.gz')
 rh_mask = math_img("img == 1", img=MASK_FILE)
@@ -47,7 +53,16 @@ cc_lh_mask.to_filename('/OUTPUTS/DATA/cc_lh_mask.nii.gz')
 cc_rh_mask = math_img("img == 4", img=MASK_FILE)
 cc_rh_mask.to_filename('/OUTPUTS/DATA/cc_rh_mask.nii.gz')
 
+# Make subregion ROI masks
+subregion1_mask = math_img("img == 1", img=SUBREGIONS_FILE)
+subregion1_mask.to_filename('/OUTPUTS/DATA/subregion1_mask.nii.gz')
+subregion2_mask = math_img("img == 2", img=SUBREGIONS_FILE)
+subregion2_mask.to_filename('/OUTPUTS/DATA/subregion2_mask.nii.gz')
+subregion3_mask = math_img('img == 3', img=SUBREGIONS_FILE)
+subregion3_mask.to_filename('/OUTPUTS/DATA/subregion3_mask.nii.gz')
+
 # Make the PDF
+print('make pdf')
 with PdfPages('/OUTPUTS/report.pdf') as pdf:
     # First page showing overview
     fig, ax = plt.subplots(5, 1, figsize=(8.5,11))
@@ -121,6 +136,10 @@ with PdfPages('/OUTPUTS/report.pdf') as pdf:
         alpha=1.0,
     )
 
+    disp.add_contours(subregion1_mask, levels=[0.5], colors='green', linewidths=1.0, alpha=1.0)
+    disp.add_contours(subregion2_mask, levels=[0.5], colors='red', linewidths=1.0, alpha=1.0)
+    disp.add_contours(subregion3_mask, levels=[0.5], colors='blue', linewidths=1.0, alpha=1.0)
+
     # Zoom by setting axis limits
     for cut_ax in disp.axes.values():
         cut_ax.ax.set_xlim(-25, 25)
@@ -146,7 +165,8 @@ with PdfPages('/OUTPUTS/report.pdf') as pdf:
         patch.set_facecolor(color)
 
     # Save first page to PDF
-    pdf.savefig(fig, dpi=300)
+    print('save first page to PDF')
+    pdf.savefig(fig, dpi=300)    
 
     # Page for each subject/session
     for i, (cr, nm) in enumerate(zip(cr_files, nm_files)):
@@ -287,3 +307,4 @@ with PdfPages('/OUTPUTS/report.pdf') as pdf:
         pdf.savefig(fig, dpi=300)
         plt.close(fig)
 
+print('PDF complete!')
