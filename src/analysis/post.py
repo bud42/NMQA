@@ -23,8 +23,8 @@ sessions = os.listdir('/OUTPUTS/DATA/SUBJECTS')
 #sessions = [x for x in sessions if x.endswith('a')]
 print(f'{sessions=}')
 
-cr_files = sorted(glob.glob('/OUTPUTS/DATA/SUBJECTS/*a/CR*.nii'))
-nm_files = sorted(glob.glob('/OUTPUTS/DATA/SUBJECTS/*a/sw*.nii'))
+cr_files = sorted(glob.glob('/OUTPUTS/DATA/SUBJECTS/*/CR*.nii'))
+nm_files = sorted(glob.glob('/OUTPUTS/DATA/SUBJECTS/*/sw*.nii'))
 
 if len(cr_files) != len(nm_files):
     raise Exception('unequal number of images found for CR/NM')
