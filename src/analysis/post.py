@@ -20,7 +20,7 @@ TITLE += '\nSubstantia Nigra(SN) Crus Cerebri(CC) Contrast Ratio(CR)\nvoxel CR =
 
 # Find data
 sessions = os.listdir('/OUTPUTS/DATA/SUBJECTS')
-sessions = [x for x in sessions if x.endswith('a')]
+#sessions = [x for x in sessions if x.endswith('a')]
 print(f'{sessions=}')
 
 cr_files = sorted(glob.glob('/OUTPUTS/DATA/SUBJECTS/*a/CR*.nii'))
