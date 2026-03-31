@@ -26,4 +26,4 @@ docker run \
 -it --rm \
 -v $TESTDIR/INPUTS:/INPUTS \
 -v $TESTDIR/OUTPUTS:/OUTPUTS \
-bud42/nmqa:v4
+bud42/nmqa:v5

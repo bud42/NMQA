@@ -1,1 +1,1 @@
-docker build --platform=linux/amd64 -t bud42/nmqa:v4 ..
+docker build --platform=linux/amd64 -t bud42/nmqa:v5 ..
