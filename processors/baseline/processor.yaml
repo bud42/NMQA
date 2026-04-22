@@ -16,7 +16,8 @@ inputs:
   xnat:
     subjects:
       sessions:
-        - assessors:
+        - types: Baseline
+          assessors:
           - types: NMQA_v5
             resources:
               - resource: DATA

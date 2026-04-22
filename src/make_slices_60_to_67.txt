@@ -1,0 +1,10 @@
+# First make a mask of the slices we want to keep
+fslmaths Segmentation_slices_59_to_68.nii.gz -mul 0 -add 1 -roi 0 -1 0 -1 60 8 0 1 mask_slices_60_to_67.nii.gz -odt short
+
+# Apply mask to get the slices we want
+fslmaths Segmentation_slices_59_to_68.nii.gz -mas mask_slices_60_to_67.nii.gz Segmentation_slices_60_to_67.nii.gz -odt short 
+
+# Replace main seg file with 60-67
+cp Segmentation_slices_60_to_67.nii.gz Segmentation.nii.gz
+gunzip Segmentation.nii.gz
+

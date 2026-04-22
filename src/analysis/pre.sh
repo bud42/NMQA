@@ -24,3 +24,4 @@ done
 # Copy the atlas and masks images for screenshots
 cp /opt/src/Segmentation.nii /OUTPUTS/
 cp /opt/ext/tpl-MNI152NLin2009cAsym_res-01_desc-brain_T1w.nii.gz /OUTPUTS/
+cp /opt/src/lr_SN_group_segncc_3_ncut_new.nii /OUTPUTS/

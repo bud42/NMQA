@@ -1,5 +1,5 @@
 XNATHOST="https://xnat.vanderbilt.edu/xnat"
-TESTDIR="$HOME/TEST-NMQA_v3.1"
+TESTDIR="$HOME/TEST-NMQA_v4"
 
 if [ -d "$TESTDIR/" ]; then
     echo "Already exists, delete first"
@@ -26,4 +26,4 @@ docker run \
 -it --rm \
 -v $TESTDIR/INPUTS:/INPUTS \
 -v $TESTDIR/OUTPUTS:/OUTPUTS \
-bud42/nmqa:v3.1
+bud42/nmqa:v5
