@@ -1,8 +1,8 @@
 ---
 containers:
   - name: NMQA
-    path: nmqa_v4.sif
-    source: docker://bud42/nmqa:v4
+    path: nmqa_v5.sif
+    source: docker://bud42/nmqa:v5
   - name: FS7
     path: fs7_post_v1.sif
     source: docker://bud42/fs7_post:v1
