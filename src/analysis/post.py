@@ -15,7 +15,7 @@ SUBREGIONS_FILE = '/OUTPUTS/lr_SN_group_segncc_3_ncut_new.nii'
 MASK_FILE = '/OUTPUTS/Segmentation.nii'
 ATLAS_FILE = '/OUTPUTS/tpl-MNI152NLin2009cAsym_res-01_desc-brain_T1w.nii.gz'
 AXIAL_SLICES = (-19, -18, -17, -16, -15, -14, -13, -12, -11, -10)
-TITLE = 'Neuromelanin Summary (NMQA_v4)'
+TITLE = 'Neuromelanin Summary (NMQA_v5)'
 TITLE += '\nSubstantia Nigra(SN) Crus Cerebri(CC) Contrast Ratio(CR)\nvoxel CR = [voxel SN - mean CC] / mean CC'
 
 # Find data
